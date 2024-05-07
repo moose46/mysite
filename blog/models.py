@@ -4,6 +4,7 @@ from typing import Any
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 
 
@@ -30,7 +31,7 @@ class Post(Base):
         PUBLISHED = "PB", "PUBLISHED"
 
     title = models.CharField(max_length=250)
-    slug = models.SlugField(max_length=250)
+    slug = models.SlugField(max_length=250, unique_for_date="publish")
     body = models.TextField()
     publish = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=2, choices=Status, default=Status.DRAFT)
@@ -45,6 +46,19 @@ class Post(Base):
                 fields=["-publish"],
             )
         ]
+
+    def get_absolute_url(self):
+        """
+        Returns the absolute URL for the blog post detail page.
+        page 57
+        Returns:
+            str: The absolute URL for the blog post detail page.
+        """
+
+        return reverse(
+            "blog:post_detail",
+            args=[self.publish.year, self.publish.month, self.publish.day, self.slug],
+        )
 
     def __str__(self):
         return self.title

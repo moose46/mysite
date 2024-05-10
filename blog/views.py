@@ -1,5 +1,7 @@
+from re import search
 from unittest import mock
 
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.core.mail import send_mail
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Count
@@ -9,7 +11,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 from taggit.models import Tag
 
-from blog.forms import CommentForm, EmailPostForm
+from blog.forms import CommentForm, EmailPostForm, SearchForm
 
 from .models import Post
 
@@ -126,4 +128,38 @@ def post_comment(request, post_id):
         request,
         "blog/post/comment.html",
         {"post": post, "form": form, "comment": comment},
+    )
+
+
+def post_search(request):
+    form = SearchForm()
+    query = None
+    results = []
+
+    if "query" in request.GET:
+        form = SearchForm(request.GET)
+        if form.is_valid():
+            query = form.cleaned_data["query"]
+            search_vector = SearchVector("title", "body")
+            search_query = SearchQuery(query)
+            results = (
+                Post.published.annotate(
+                    search=search_vector, rank=SearchRank(search_vector, search_query)
+                )
+                .filter(search=search_query)
+                .order_by("-rank")
+            )
+
+            # results = (
+            #     Post.published.annotate(
+            #         similarity=TrigramSimilarity("title", query),
+            #     )
+            #     .filter(similarity__gt=0.1)
+            #     .order_by("-similarity")
+            # )
+
+    return render(
+        request,
+        "blog/post/search.html",
+        {"form": form, "query": query, "results": results},
     )

@@ -25,7 +25,8 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
-
+# pp.134 Django By Example 5
+SITE_ID = 1
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -46,7 +47,10 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.sites",
+    "django.contrib.sitemaps",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     "taggit",
     "blog",
 ]
@@ -86,16 +90,28 @@ WSGI_APPLICATION = "mysite.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
+    # "default": {
+    #     "ENGINE": "mssql",
+    #     "NAME": "blog_db",
+    #     "USER": "",
+    #     "PASSWORD": "",
+    #     "HOST": ".",
+    #     "PORT": "",
+    #     "OPTIONS": {
+    #         "driver": "ODBC Driver 17 for SQL Server",
+    #     },
+    # },
+    # https://dev.to/steadylearner/how-to-set-up-postgresql-and-pgadmin-with-docker-51h
     "default": {
-        "ENGINE": "mssql",
-        "NAME": "blog_db",
-        "USER": "",
-        "PASSWORD": "",
-        "HOST": ".",
-        "PORT": "",
-        "OPTIONS": {
-            "driver": "ODBC Driver 17 for SQL Server",
-        },
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("DB_NAME"),
+        "USER": config("DB_USER"),
+        "PASSWORD": config("DB_PASSWORD"),
+        "HOST": config("DB_HOST"),
+        "PORT": 5432,
+        # "OPTIONS": {
+        #     "driver": "ODBC Driver 17 for SQL Server",
+        # },
     },
 }
 
